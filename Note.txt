@@ -20,3 +20,48 @@ dotnet add package Microsoft.EntityFrameworkCore.Tools
 
 5. scaffold webapi controller using following command:
 dotnet aspnet-codegenerator controller -name ValuesController -async -api --readWriteActions -outDir Controllers
+
+6. working with database,  create sqlserver container: not working on windows10 home
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=SqlExpress!" -e "MSSQL_PID=Express" -p 1444:1433 -d mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+
+local sql db: DESKTOP-2U5FPMN
+
+7. add connection string in appsettings.json
+"ConnectionStrings":{
+	"DefaultConnection": "Data Source=DESKTOP-2U5FPMN; Initial Catalog=Health; Integrated Security=true"
+}
+
+8. create Data Context class under Data folder,  inherit from DbContext class and add the all the DbSet classes
+
+9. on startup.cs ,  add services.AddDbContext middleware and map DataContext class and confugure UseSqlServer
+	services.AddDbContext<HealthContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+10. Create Dummy data using DummyData class.
+
+11. run the dotnet-ef migrations on vscode
+dotnet-ef migrations add MigrationHealth -o Data/Migrations
+dotnet-ef database update
+
+12. Execute DummyData in startup.cs
+DummyData.Initialize(app);
+
+13. run the application
+dotnet watch run
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
