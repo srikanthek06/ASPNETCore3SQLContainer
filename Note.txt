@@ -1,0 +1,22 @@
+1. Create a folder "Health"
+under which create 2 more folders "HealthAPI" and "CORSClient"
+
+2. navigate to HealthAPI folder and create new web api using following command
+dotnet new webapi
+dotnet watch run
+
+3. verify webapi works properly using following url on the browser and ensure json displayed on browser
+https://localhost:5001/WeatherForecast
+
+4. install bunch of following tools into your project
+dotnet tool install --global dotnet-ef --version 3.0.0-*
+dotnet tool install -g dotnet-aspnet-codegenerator
+
+dotnet add package Microsoft.EntityFrameworkCore.Design
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer.Design
+dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design
+dotnet add package Microsoft.EntityFrameworkCore.SqlServer
+dotnet add package Microsoft.EntityFrameworkCore.Tools
+
+5. scaffold webapi controller using following command:
+dotnet aspnet-codegenerator controller -name ValuesController -async -api --readWriteActions -outDir Controllers
