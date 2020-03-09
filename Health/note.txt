@@ -1,3 +1,27 @@
+Skip to content
+Search or jump to…
+
+Pull requests
+Issues
+Marketplace
+Explore
+ 
+@srikanthek06 
+Learn Git and GitHub without any code!
+Using the Hello World guide, you’ll start a branch, write comments, and open a pull request.
+
+
+srikanthek06
+/
+ASPNETCore3SQLContainer
+1
+00
+ Code Issues 0 Pull requests 0 Actions Projects 0 Wiki Security Insights Settings
+ASPNETCore3SQLContainer/Note.txt
+ eksri db context and migrations
+f770638 3 minutes ago
+169 lines (73 sloc)  4.37 KB
+  
 1. Create a folder "Health"
 under which create 2 more folders "HealthAPI" and "CORSClient"
 
@@ -17,4 +41,95 @@ dotnet add package Microsoft.EntityFrameworkCore.SqlServer.Design
 dotnet add package Microsoft.VisualStudio.Web.CodeGeneration.Design
 dotnet add package Microsoft.EntityFrameworkCore.SqlServer
 dotnet add package Microsoft.EntityFrameworkCore.Tools
+
+5. scaffold webapi controller using following command:
+dotnet aspnet-codegenerator controller -name ValuesController -async -api --readWriteActions -outDir Controllers
+
+6. working with database,  create sqlserver container: not working on windows10 home
+docker run -e "ACCEPT_EULA=Y" -e "SA_PASSWORD=SqlExpress!" -e "MSSQL_PID=Express" -p 1444:1433 -d mcr.microsoft.com/mssql/server:2017-latest-ubuntu
+
+local sql db: DESKTOP-2U5FPMN
+
+7. add connection string in appsettings.json
+"ConnectionStrings":{
+	"DefaultConnection": "Data Source=DESKTOP-2U5FPMN; Initial Catalog=Health; Integrated Security=true"
+}
+
+8. create Data Context class under Data folder,  inherit from DbContext class and add the all the DbSet classes
+
+9. on startup.cs ,  add services.AddDbContext middleware and map DataContext class and confugure UseSqlServer
+	services.AddDbContext<HealthContext>(options =>
+            {
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection"));
+            });
+
+10. Create Dummy data using DummyData class.
+
+11. run the dotnet-ef migrations on vscode
+dotnet-ef migrations add MigrationHealth -o Data/Migrations
+dotnet-ef database update
+
+12. Execute DummyData in startup.cs
+DummyData.Initialize(app);
+
+13. run the application
+dotnet watch run
+
+14. verify the sqlserver database tables for data,  so that, database tables and data are ready to consume.
+
+15. create scaffold controller for Patient, Ailment and Medications
+dotnet aspnet-codegenerator controller -name PatientsController -async -api -m Patient -dc HealthContext -outDir Controllers
+
+16. we're done with HealthAPI ,  now move on CORSClient - Web
+
+17. Navigate to CORSClient folder on vs code
+18. create empty web applicaiton using following command:
+dotnet new web
+
+18a. since HealthAPI and CORSClient running on same port,  its necessary to change port for CORSClient
+ on CORSClient/Properties/launchSettings.cs//change the localhost:port to 6001 and 6000 
+dotnet watch run  localhost:6001 and ensure that CORSClient display Hello World.
+
+19.  add both the projects to the solution file, create a new sln file and add these 2 projects
+dotnet new sln 
+dotnet sln Health.sln add .\HealthAPI\HealthAPI.csproj
+dotnet sln Health.sln add .\CORSClient\CORSClient.csproj
+
+20. on CORSClient, create a new folder wwwroot and add new file index.html with some test header and browse index.html
+CORSClient/wwwroot/index.html >> Hello index.html
+https://localhost:6001/index.html
+you'll displayed with This localhost page cant be found, reason for this, startus.cs not configured to display static files
+
+add app.UseStaticFiles() on startup.cs just below the app.UseRouting()
+after adding this, try again on the browser https://localhost:6001/index.html,  this will display content from index.html file
+
+
+21. microsoft created a utility called LibMan, which will be used to download clientside frameworks
+you can use nuget to download nuget packages and you can use libman to download clientside libraries or frameworks like JQuery, Bootstrap and so on.
+install following tools and download JQuery library.
+
+dotnet tool install -g Microsoft.Web.LibraryManager.Cli
+libman install jquery@3.2.1 --provider cdnjs --destination wwwroot/scripts/jquery --files jquery.min.js
+
+22.  add CORS on startup.cs of CORSClient
+services.AddCors(o => o.AddPolicy("HealthPolicy", builder => {
+	builder.AllowAnyOrigin()
+	.AllowAnyMethod()
+	.AllowAnyHeader();
+}));
+
+add another command inside configure method:
+app.UseCors();
+
+at the PatientApi Controller,  include EnableCors attribute
+[Enable("HealthPolicy")]
+
+
+
+
+
+
+
+
+
 
